@@ -3,10 +3,15 @@ version: '3.1'
 
 services:
 
-  mysql-db:
-    container: "mysql-db"
+  db:
     image: mysql
     ports:
-      - 8080:8080
+      - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD:
+      MYSQL_ROOT_PASSWORD: root
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+  
