@@ -34,6 +34,4 @@ public class Address {
     @JoinColumn(name = "contact_id", referencedColumnName = "id")
     private Contact contact;
 
-    @OneToMany(mappedBy = "contact")
-    private List<Address> addresses;
 }

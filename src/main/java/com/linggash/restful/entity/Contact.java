@@ -33,6 +33,6 @@ public class Contact {
     @JoinColumn(name = "username", referencedColumnName = "username")
     private User user;
 
-    @OneToMany(mappedBy = "user")
-    private List<Contact> contacts;
+    @OneToMany(mappedBy = "contact")
+    private List<Address> addresses;
 }
