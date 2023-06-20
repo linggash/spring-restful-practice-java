@@ -2,6 +2,7 @@ package com.linggash.restful.service.impl;
 
 import com.linggash.restful.entity.User;
 import com.linggash.restful.model.RegisterUserRequest;
+import com.linggash.restful.model.UserResponse;
 import com.linggash.restful.repository.UserRepository;
 import com.linggash.restful.security.BCrypt;
 import com.linggash.restful.service.UserService;
@@ -37,5 +38,13 @@ public class UserServiceImpl implements UserService {
         user.setName(request.getName());
 
         userRepository.save(user);
+    }
+
+    @Override
+    public UserResponse get(User user) {
+        return UserResponse.builder()
+                .username(user.getUsername())
+                .name(user.getName())
+                .build();
     }
 }
