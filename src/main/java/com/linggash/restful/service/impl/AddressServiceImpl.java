@@ -5,6 +5,7 @@ import com.linggash.restful.entity.Contact;
 import com.linggash.restful.entity.User;
 import com.linggash.restful.model.AddressResponse;
 import com.linggash.restful.model.CreateAddressRequest;
+import com.linggash.restful.model.UpdateAddressRequest;
 import com.linggash.restful.repository.AddressRepository;
 import com.linggash.restful.repository.ContactRepository;
 import com.linggash.restful.service.AddressService;
@@ -58,6 +59,27 @@ public class AddressServiceImpl implements AddressService {
 
         Address address = addressRepository.findFirstByContactAndId(contact, addressId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Address is not found"));
+
+        return toAddressResponse(address);
+    }
+
+    @Transactional
+    @Override
+    public AddressResponse update(User user, UpdateAddressRequest request) {
+        validationService.validate(request);
+
+        Contact contact = contactRepository.findFirstByUserAndId(user, request.getContactId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact is not found"));
+
+        Address address = addressRepository.findFirstByContactAndId(contact, request.getAddressId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Address is not found"));
+
+        address.setStreet(request.getStreet());
+        address.setCity(request.getCity());
+        address.setProvince(request.getProvince());
+        address.setCountry(request.getCountry());
+        address.setPostalCode(request.getPostalCode());
+        addressRepository.save(address);
 
         return toAddressResponse(address);
     }

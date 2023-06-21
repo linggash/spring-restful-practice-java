@@ -7,6 +7,7 @@ import com.linggash.restful.entity.Contact;
 import com.linggash.restful.entity.User;
 import com.linggash.restful.model.AddressResponse;
 import com.linggash.restful.model.CreateAddressRequest;
+import com.linggash.restful.model.UpdateAddressRequest;
 import com.linggash.restful.model.WebResponse;
 import com.linggash.restful.repository.AddressRepository;
 import com.linggash.restful.repository.ContactRepository;
@@ -20,11 +21,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -98,7 +99,7 @@ class AddressControllerTest {
         request.setCity("Bogor");
         request.setProvince("Jabar");
         request.setCountry("Indo");
-        request.setCountry("Indonesia");
+        request.setPostalCode("2353");
 
         mockMvc.perform(
                 post("/api/contacts/test/addresses")
@@ -172,6 +173,71 @@ class AddressControllerTest {
             assertEquals(address.getProvince(), response.getData().getProvince());
             assertEquals(address.getCountry(), response.getData().getCountry());
             assertEquals(address.getPostalCode(), response.getData().getPostalCode());
+        });
+    }
+
+    @Test
+    void updateAddressBadRequest() throws Exception{
+        UpdateAddressRequest request = new UpdateAddressRequest();
+        request.setCountry("");
+
+        mockMvc.perform(
+                put("/api/contacts/test/addresses/test")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void updateAddressSuccess() throws Exception{
+        Contact contact = contactRepository.findById("test").orElseThrow();
+
+        Address address = new Address();
+        address.setId("test");
+        address.setStreet("Lama");
+        address.setCity("Lama");
+        address.setProvince("Lama");
+        address.setCountry("Lama");
+        address.setPostalCode("lama");
+        address.setContact(contact);
+        addressRepository.save(address);
+
+        UpdateAddressRequest request = new UpdateAddressRequest();
+        request.setStreet("Jalan");
+        request.setCity("Bogor");
+        request.setProvince("Jabar");
+        request.setCountry("Indo");
+        request.setPostalCode("23421");
+
+        mockMvc.perform(
+                put("/api/contacts/test/addresses/test")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<AddressResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertNull(response.getErrors());
+            assertEquals(request.getStreet(), response.getData().getStreet());
+            assertEquals(request.getCity(), response.getData().getCity());
+            assertEquals(request.getProvince(), response.getData().getProvince());
+            assertEquals(request.getCountry(), response.getData().getCountry());
+            assertEquals(request.getPostalCode(), response.getData().getPostalCode());
+
+            assertTrue(addressRepository.existsById(response.getData().getId()));
         });
     }
 }
