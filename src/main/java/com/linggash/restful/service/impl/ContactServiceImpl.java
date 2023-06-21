@@ -8,8 +8,10 @@ import com.linggash.restful.repository.ContactRepository;
 import com.linggash.restful.service.ContactService;
 import com.linggash.restful.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -37,6 +39,19 @@ public class ContactServiceImpl implements ContactService {
 
         contactRepository.save(contact);
 
+        return toContactResponse(contact);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ContactResponse get(User user, String id) {
+        Contact contact = contactRepository.findFirstByUserAndId(user, id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact Not Found"));
+
+        return toContactResponse(contact);
+    }
+
+    private ContactResponse toContactResponse(Contact contact){
         return ContactResponse.builder()
                 .id(contact.getId())
                 .firstName(contact.getFirstName())
