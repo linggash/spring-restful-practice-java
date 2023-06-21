@@ -54,4 +54,14 @@ public class ContactController {
                 .data(contactResponse)
                 .build();
     }
+
+    @DeleteMapping(
+            path = "/api/contacts/{contactId}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+
+    )
+    public WebResponse<String> delete(User user,@PathVariable String contactId){
+        contactService.delete(user, contactId);
+        return WebResponse.<String>builder().data("OK").build();
+    }
 }
