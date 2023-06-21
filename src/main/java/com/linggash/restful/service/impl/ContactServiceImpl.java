@@ -4,6 +4,7 @@ import com.linggash.restful.entity.Contact;
 import com.linggash.restful.entity.User;
 import com.linggash.restful.model.ContactResponse;
 import com.linggash.restful.model.CreateContactRequest;
+import com.linggash.restful.model.UpdateContactRequest;
 import com.linggash.restful.repository.ContactRepository;
 import com.linggash.restful.service.ContactService;
 import com.linggash.restful.service.ValidationService;
@@ -47,6 +48,23 @@ public class ContactServiceImpl implements ContactService {
     public ContactResponse get(User user, String id) {
         Contact contact = contactRepository.findFirstByUserAndId(user, id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact Not Found"));
+
+        return toContactResponse(contact);
+    }
+
+    @Transactional
+    @Override
+    public ContactResponse update(User user, UpdateContactRequest request) {
+        validationService.validate(request);
+
+        Contact contact = contactRepository.findFirstByUserAndId(user, request.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact Not Found"));
+
+        contact.setFirstName(request.getFirstName());
+        contact.setLastName(request.getLastName());
+        contact.setEmail(request.getEmail());
+        contact.setPhone(request.getPhone());
+        contactRepository.save(contact);
 
         return toContactResponse(contact);
     }
